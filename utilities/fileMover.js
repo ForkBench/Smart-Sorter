@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { printC, printCLn } = require("../utilities/printer");
 const path = require("path");
+const { log } = require("../utilities/logger");
 
 module.exports = {
     mover: (pathToPutImage, filePath, fileName) => {
@@ -28,5 +29,8 @@ module.exports = {
 
         // Log
         printCLn(`Moved ${fileName} to ${pathToPutImage}`, "yellow");
+        
+        log(`[${fileName} === ${pathToPutImage}]`, false, "mv-logs");
+        log(`Moved ${fileName} to ${pathToPutImage}`);
     }
 }
