@@ -14,9 +14,7 @@ module.exports = {
         { name: "TP", body: [ {includes: undefined, startsWith: "tp", endsWith: undefined, equalTo: undefined} ] },
     ],
     // The files required in the folder
-    requiredFiles: [ 
-        
-    ],
+    requiredFiles: [],
     // The files forbidden in the folder
     forbiddenFiles: [
         { name: "Exercices file", body: [{ includes: undefined, startsWith: "exo", endsWith: ".c", equalTo: undefined }] },
