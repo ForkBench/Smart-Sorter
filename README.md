@@ -16,6 +16,7 @@ cd smart-sorter
 
 After installing the program, you have to configure it using the following template :
 
+`config.json` (in the main folder)
 ```json
 {
     "workPath": "",
