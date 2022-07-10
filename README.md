@@ -115,6 +115,11 @@ It's based on names analysis, and it's not very accurate sometimes (for example 
       - Command verifier files
       - Callback files
     - Config files
+- Add a program structure convertor
+  - For example in a C program, to be able to change the structure and imports easily
+- Change `forbiddenBody`, ... body from `json` and arrays to structures like following :
+  - Before : `{ name: "Forbidden", body: [ {includes: undefined, startsWith: "header-", endsWith: ".h", equalTo: undefined} ] }`
+  - After  : `{ name: "Forbidden", body: ["header-*.h"]}`
 - Add a documentation
 
 ## Author
