@@ -1,0 +1,94 @@
+{
+  "folder": {
+    "$": {
+      "name": "undefined",
+      "required": "true"
+    },
+    "folder": [
+      {
+        "$": {
+          "name": "src",
+          "required": "true"
+        },
+        "folder": [
+          {
+            "$": {
+              "name": "core",
+              "required": "true"
+            },
+            "file": [
+              {
+                "$": {
+                  "name": "main.c",
+                  "required": "true"
+                }
+              },
+              {
+                "$": {
+                  "name": "*.c",
+                  "required": "false"
+                }
+              }
+            ]
+          },
+          {
+            "$": {
+              "name": "module*",
+              "required": "false"
+            },
+            "file": [
+              {
+                "$": {
+                  "name": "*.c",
+                  "required": "true"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "$": {
+          "name": "include",
+          "required": "false"
+        },
+        "folder": [
+          {
+            "$": {
+              "name": "core",
+              "required": "true"
+            },
+            "file": [
+              {
+                "$": {
+                  "name": "main.h",
+                  "required": "true"
+                }
+              },
+              {
+                "$": {
+                  "name": "*.h",
+                  "required": "false"
+                }
+              }
+            ]
+          },
+          {
+            "$": {
+              "name": "module*",
+              "required": "false"
+            },
+            "file": [
+              {
+                "$": {
+                  "name": "*.h",
+                  "required": "true"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

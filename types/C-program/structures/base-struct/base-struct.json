@@ -1,0 +1,44 @@
+{
+  "folder": {
+    "$": {
+      "name": "undefined",
+      "required": "true"
+    },
+    "file": [
+      {
+        "$": {
+          "name": "main.c",
+          "required": "true"
+        }
+      },
+      {
+        "$": {
+          "name": "*.c",
+          "required": "false"
+        }
+      },
+      {
+        "$": {
+          "name": "*.h",
+          "required": "false"
+        }
+      }
+    ],
+    "folder": [
+      {
+        "$": {
+          "name": "undefined",
+          "required": "false"
+        },
+        "file": [
+          {
+            "$": {
+              "name": "*.*",
+              "required": "true"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
