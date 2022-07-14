@@ -5,18 +5,15 @@ const { printC, printCLn } = require('./utilities/printer');
 const fs = require('fs');
 
 const config = require('./config');
-const commandVerifier = require('./modes/command-verifier');
 
-const mode = config.mode;
-const modeFunctions = require('./modes/mode-callback');
+const { check } = require('./utilities/command-base');
 const { log } = require('./utilities/logger');
-const fileFunction = modeFunctions[`${mode}ModeCallback`].fileFunction;
-const folderFunction = modeFunctions[`${mode}ModeCallback`].folderFunction;
+
 
 
 log(`Starting in ${mode} mode`);
 
-const readFolder = (dir, callbackFile, callbackFolder = undefined) => {
+const readFolder = (dir, callbackFile = undefined, callbackFolder = undefined) => {
     // Read recursively the working folder
     fs.readdirSync(dir).forEach(element => {
 
@@ -44,6 +41,13 @@ const readFolder = (dir, callbackFile, callbackFolder = undefined) => {
 // Common to each mode
 readFolder(path.join(__dirname, "./types/" + config.mode + "/"),
     (filePath) => {
+
+        // We check if the extension is valid for this type
+        const extension = filePath.split(".").pop();
+
+        if (extension !== "js") {
+            return;
+        }
         
         // We import the type
         printC(`Importing ${filePath}...`, "blue");
@@ -54,15 +58,14 @@ readFolder(path.join(__dirname, "./types/" + config.mode + "/"),
         printCLn(`Loaded ${importedType.name}.`);
 
         emitter.on("newData", (filePath) => {
-        
-            commandVerifier[`${mode}CommandVerifier`](filePath, importedType, config);
+
+
 
         })
 
     },
     (folderPath) => {
-        printCLn("-> Warning /!\\ : "+folderPath+" is a folder.", "yellow");
-        log("-> Warning /!\\ : "+folderPath+" is a folder.");
+
     }
 );
 

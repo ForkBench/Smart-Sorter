@@ -1,0 +1,20 @@
+[*]{
+    [src]{
+        [core]{
+            main.c
+            ?*.c
+        }
+        [?module*]{
+            *.c
+        }
+    }
+    [?include]{
+        [core]{
+            main.h
+            ?*.h
+        }
+        [?module*]{
+            *.h
+        }
+    }
+}

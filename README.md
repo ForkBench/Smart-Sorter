@@ -78,7 +78,7 @@ Pull requests are welcome. Contact me on my school address if you have any quest
 
 ## Project Status
 
-The current project state is **stable**.
+The current project state is **UNSTABLE**.
 It supports simple folders and files analysis, without complex import and sub-folders analysis.
 
 It's based on names analysis, and it's not very accurate sometimes (for example images with the same name).
