@@ -4,74 +4,45 @@ const path = require('path');
 const { printC, printCLn } = require('./utilities/printer');
 const fs = require('fs');
 
-const config = require('./config');
+const { structureComparator } = require('./utilities/folderUtil');
 
-const { check } = require('./utilities/command-base');
+const config = require('./config');
+const workPath = config.workPath;
 const { log } = require('./utilities/logger');
 
+// Import modules
+fs.readdirSync("./types").forEach(folder => {
+    const module = require(`./types/${folder}/core.js`);
+    const moduleConfig = require(`./types/${folder}/config.js`);
 
+    const structures = fs.readdirSync(`./types/${folder}/structures`);
+    structures.forEach(structure => {
+        const structurePath = `./types/${folder}/structures/${structure}/${structure}.st`;
+        var matchingPath = structureComparator(workPath, structurePath);
+        if (matchingPath.length > 0) {
+            module.callback(matchingPath, structure);
+        }
+    });
 
-log(`Starting in ${mode} mode`);
+    printC(`Importing ${folder}`);
+    log(`Loaded module ${folder}`);
+});
 
-const readFolder = (dir, callbackFile = undefined, callbackFolder = undefined) => {
-    // Read recursively the working folder
-    fs.readdirSync(dir).forEach(element => {
-
-        var elementName = element.split("/").pop();
-        if (!elementName.includes("#") && !elementName.includes("~") && !elementName.startsWith(".")) {
-            if (fs.statSync(path.join(dir, element)).isDirectory()) {
-
-                if (callbackFolder !== undefined) {
-                    callbackFolder(dir+element+"/", emitter);
-                }
-
-                readFolder(dir+element+"/", callbackFile, callbackFolder);
-
+const read = (dir = workPath) => {
+    var elements = fs.readdirSync(dir);
+    elements.forEach(element => {
+        if (!element.startsWith(".")) {
+            var elementPath = path.join(dir, element);
+            if (fs.statSync(elementPath).isDirectory()) {
+                read(elementPath + "/");
             } else {
-
-                if (callbackFile !== undefined) {
-                    callbackFile(dir+element, emitter);
-                }
-
+                emitter.emit('file', elementPath);
             }
         }
     });
 }
 
-// Common to each mode
-readFolder(path.join(__dirname, "./types/" + config.mode + "/"),
-    (filePath) => {
-
-        // We check if the extension is valid for this type
-        const extension = filePath.split(".").pop();
-
-        if (extension !== "js") {
-            return;
-        }
-        
-        // We import the type
-        printC(`Importing ${filePath}...`, "blue");
-        log(`Importing ${filePath}...`);
-
-        const importedType = require(filePath);
-
-        printCLn(`Loaded ${importedType.name}.`);
-
-        emitter.on("newData", (filePath) => {
-
-
-
-        })
-
-    },
-    (folderPath) => {
-
-    }
-);
-
-// Changes depending on the mode
-readFolder(config.workPath, fileFunction, folderFunction);
-
+read();
 
 process.on("exit", () => {
     printCLn("\nDone.\n");

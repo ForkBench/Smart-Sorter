@@ -6,7 +6,7 @@ module.exports = {
             
         process.stdout.clearLine(0);
         process.stdout.cursorTo(0);
-        process.stdout.write(chalk[color](`${text}\n`));
+        process.stdout.write(chalk[color](`\n${text}\n`));
     
     },
 

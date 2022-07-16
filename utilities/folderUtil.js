@@ -103,6 +103,8 @@ module.exports = {
             }
         });
 
+
+
         // We store the files that are valid in this array
         var matchingPath = [];
 

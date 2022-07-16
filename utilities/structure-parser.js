@@ -45,7 +45,6 @@ function parser(lines) {
 module.exports = {
     structureParser: (filePath) => {
 
-        printC(`Parsing structure file: ${filePath}...`);
         log(`Parsing structure file: ${filePath}...`);
         const input = fs.readFileSync(filePath, 'utf8');
 
@@ -53,11 +52,9 @@ module.exports = {
 
         const data = parser(lines, false);
 
-        printCLn(`Parsing structure file: ${filePath}... done.`);
         log(`Parsing structure file: ${filePath}... done.`);
         fs.writeFileSync(filePath.replace(new RegExp(".st$"), '-required.txt'), data.requiredPaths.join("\n"));
         fs.writeFileSync(filePath.replace(new RegExp(".st$"), '-non-required.txt'), data.nonRequirePaths.join("\n"));
-        printCLn("Saved required and non-required paths to files.");
         log("Saved required and non-required paths to files.");
     }
 }

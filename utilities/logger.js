@@ -26,14 +26,7 @@ module.exports = {
         var logFileContent = fs.readFileSync(logFilePath, "utf8");
         var lineNumber = logFileContent.split("\n").length;
 
-        if (lineNumber > 1000) {
-            var newLogFile = logFile.split(".")[0] + "_" + dateStringFile + ".log";
-            fs.renameSync(logFilePath, path.join(__dirname, "./logs", logFolderPath, newLogFile));
-            logFile = newLogFile;
-            logFilePath = path.join(__dirname, "./logs", logFolderPath, logFile);
-            logFileContent = "";
-        }
-
+        
         if (dateLess === false) {
             fs.appendFileSync(logFilePath, `${dateString}\t : ${message}\n`);
         } else {
