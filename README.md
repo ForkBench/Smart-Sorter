@@ -14,21 +14,40 @@ cd smart-sorter
 
 ## Usage
 
-After installing the program, you have to configure it using the following template :
+### Type Configuration
 
-`config.json` (in the main folder)
-```json
-{
-    "workPath": "",
-    "mode": "",
-    "forbiddenFolders": [
-        ""
-    ]
+After installing the program, you have to configure it :
+
+```bash
+npm run add-type
+```
+
+Then type the name, and configure the structures as following :
+
+```
+[CONTENT]   => Directory named "CONTENT"
+*           => glob substitution for "all"
+?           => make some content not required (not implemented yet)
+```
+
+Example :
+
+```
+[*]{
+    main.c
+    [?*]{
+        *.*
+    }
+    ?*.c
+    ?*.h
 }
 ```
 
-Paths here are full paths closed with a "/".
-⚠️ __The program analyses recursively the files and directories in the work path. Make sure that the work path is not too large.__
+In plain text, it gives : "a folder with whatever name, inside : main.c, a folder and .c/.h that aren't required. Inside the second folder, whatever file extension".
+
+### Software Configuration
+
+Add `workPath` in config.json file.
 
 Then to run it just use the following command :
 
@@ -36,37 +55,6 @@ Then to run it just use the following command :
 node index.js
 ```
 
-To add another type, you can add a `javascript` file in the `types/[mode-name]` folder. The file must have the following structure :
-
-```javascript
-// Possible name : types/folder/C-headerless.js
-module.exports = {
-
-    // The name of the type
-    name: "C programs without .h",
-    // The type extensions
-    extensions: [],
-    // What the name should look like
-    requiredBody: [],
-    // What the name should not look like
-    forbiddenBody: [ 
-        { name: "Forbidden", body: [ {includes: undefined, startsWith: undefined, endsWith: ".h", equalTo: undefined} ] },
-    ],
-    // The files required in the folder
-    requiredFiles: [],
-    // The files forbidden in the folder
-    forbiddenFiles: [
-        { name: "A C program", body: [{ includes: undefined, startsWith: "main", endsWith: ".c", equalTo: undefined }] },
-    ],
-    // The description of the type
-    description: "C programs with main files without headers.",
-    // The callback function
-    callback: (filePath, config) => {
-        // Do something
-    }
-
-}
-```
 
 ## Contributing
 
@@ -78,10 +66,25 @@ Pull requests are welcome. Contact me on my school address if you have any quest
 
 ## Project Status
 
-The current project state is **UNSTABLE**.
-It supports simple folders and files analysis, without complex import and sub-folders analysis.
+The current project state is **stable**.
+It supports now arborescence analysis, with types.
 
 It's based on names analysis, and it's not very accurate sometimes (for example images with the same name).
+
+## Last Changes
+
+- Non-required analysis
+
+- Improve folder *arborescence*
+  - A dedicated folder for each type to make it easier to play with :
+    - Function files
+      - Command verifier files
+      - Callback files
+    - Config files
+    
+- Change `forbiddenBody`, ... body from `json` and arrays to structures like following :
+  - Before : `{ name: "Forbidden", body: [ {includes: undefined, startsWith: "header-", endsWith: ".h", equalTo: undefined} ] }`
+  - After  : `{ name: "Forbidden", body: ["header-*.h"]}`
 
 ## Future plans
 
@@ -91,7 +94,7 @@ It's based on names analysis, and it's not very accurate sometimes (for example 
   - Analyse the *file content*
     - For example imports, includes, defines, etc...
     - Using [`flex-js-open`](https://www.npmjs.com/package/@fork-bench/flexjs-open)?
-      - Improve `flex-js-open`
+        - ~~Improve `flex-js-open`~~
 - Add some mode examples
   - C programs, make it powerful
 - Add *profiles* feature
@@ -109,17 +112,10 @@ It's based on names analysis, and it's not very accurate sometimes (for example 
       - ... and/or a specific file or folder
 - Create an *UI* in (maybe) new frameworks like ReactJS or AngularJS
   - Add folder graphs?, with stats, etc...
-- Improve folder *arborescence*
-  - A dedicated folder for each type to make it easier to play with :
-    - Function files
-      - Command verifier files
-      - Callback files
-    - Config files
+
 - Add a program structure convertor
   - For example in a C program, to be able to change the structure and imports easily
-- Change `forbiddenBody`, ... body from `json` and arrays to structures like following :
-  - Before : `{ name: "Forbidden", body: [ {includes: undefined, startsWith: "header-", endsWith: ".h", equalTo: undefined} ] }`
-  - After  : `{ name: "Forbidden", body: ["header-*.h"]}`
+
 - Add a documentation
 
 ## Author
