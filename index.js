@@ -13,7 +13,6 @@ const { log } = require('./utilities/logger');
 // Import modules
 fs.readdirSync("./types").forEach(folder => {
     const module = require(`./types/${folder}/core.js`);
-    const moduleConfig = require(`./types/${folder}/config.js`);
 
     const structures = fs.readdirSync(`./types/${folder}/structures`);
     structures.forEach(structure => {
