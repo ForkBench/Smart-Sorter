@@ -2,65 +2,43 @@ const fs = require('fs');
 const { log } = require('../utilities/logger');
 const { printCLn, printC } = require('../utilities/printer');
 
-function tabulationAdder(n) {
-    var str = "";
-    for (var i = 0; i < n; i++) {
-        str += "\t";
-    }
-    return str;
-}
 
 function emptySpaceRemover(str) {
     // Remove tabs, and spaces
     return str.replace(/\s/g, '');
 }
 
-function getContent(content) {
-
-
-    if (content === "*") {
-        return {value: "*", required: true};
-    } else if (content.startsWith("?")) {
-        return {value: getContent(content.substring(1, content.length)).value, required: false};
-    }
-
-    return {value: content, required: true}
-
-
-}
 
 
 function parser(lines) {
 
     var paths = [];
+    var requiredPaths = [];
+    var nonRequirePaths = [];
     var currentPath = ".";
-    var requiredFolder = true;
-    
+
     lines.forEach(line => {
         var clearedLine = emptySpaceRemover(line);
         if (clearedLine.startsWith("[")) {
-            var name = getContent(clearedLine.substring(1, clearedLine.length - 2));
-            if (name.required) {
-                requiredFolder = true;
-                currentPath += "/" + name.value;
-            } else {
-                requiredFolder = false;
-            }
+            var name = clearedLine.substring(1, clearedLine.length - 2);
+            currentPath += "/" + name;
         } else if (clearedLine.startsWith("}")) {
-            // We have to remove everything after the last "/"
-            if (requiredFolder === true) {
-                currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"));
-            }
-            requiredFolder = true;
+            currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"));
         } else {
-            var content = getContent(clearedLine);
-            if (content.required) {
-                paths.push(currentPath + "/" + content.value);
-            }
+            var name = clearedLine;
+            paths.push(currentPath + "/" + name);
         }
     });
 
-    return paths;
+    paths.forEach(path => {
+        if (path.includes("?")) {
+            nonRequirePaths.push(path);
+        } else {
+            requiredPaths.push(path);
+        }
+    });
+
+    return { requiredPaths, nonRequirePaths };
 
 }
 
@@ -73,11 +51,13 @@ module.exports = {
 
         const lines = input.split("\n");
 
-        const data = parser(lines);
+        const data = parser(lines, false);
 
         printCLn(`Parsing structure file: ${filePath}... done.`);
         log(`Parsing structure file: ${filePath}... done.`);
-        fs.writeFileSync(filePath.replace(new RegExp("st$"), 'txt'), data.join("\n"));
-
+        fs.writeFileSync(filePath.replace(new RegExp(".st$"), '-required.txt'), data.requiredPaths.join("\n"));
+        fs.writeFileSync(filePath.replace(new RegExp(".st$"), '-non-required.txt'), data.nonRequirePaths.join("\n"));
+        printCLn("Saved required and non-required paths to files.");
+        log("Saved required and non-required paths to files.");
     }
 }

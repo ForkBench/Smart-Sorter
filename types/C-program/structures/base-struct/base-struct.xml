@@ -1,9 +1,0 @@
-<?xml version=”1.0" encoding=”UTF-8"?>
-<folder name='undefined' required='true'>
-	<file name='main.c' required='true'/>
-	<folder name='undefined' required='false'>
-		<file name='*.*' required='true'/>
-	</folder>
-	<file name='*.c' required='false'/>
-	<file name='*.h' required='false'/>
-</folder>

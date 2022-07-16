@@ -1,0 +1,5 @@
+./*/src/core/?*.c
+./*/src/?module*/*.c
+./*/?include/core/main.h
+./*/?include/core/?*.h
+./*/?include/?module*/*.h
