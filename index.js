@@ -14,7 +14,14 @@ const { log } = require('./utilities/logger');
 fs.readdirSync("./types").forEach(folder => {
     const module = require(`./types/${folder}/core.js`);
 
+    printCLn(`Importing ${folder}`);
+    log(`Loaded module ${folder}`);
+
     const structures = fs.readdirSync(`./types/${folder}/structures`);
+
+    printCLn(`Found ${structures.length} structures`);
+    log(`Found ${structures.length} structures`);
+
     structures.forEach(structure => {
         const structurePath = `./types/${folder}/structures/${structure}/${structure}.st`;
         var matchingPath = structureComparator(workPath, structurePath);
@@ -23,8 +30,6 @@ fs.readdirSync("./types").forEach(folder => {
         }
     });
 
-    printC(`Importing ${folder}`);
-    log(`Loaded module ${folder}`);
 });
 
 const read = (dir = workPath) => {
