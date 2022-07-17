@@ -21,9 +21,15 @@ var folderPath = __dirname+`/../types/${name}/`;
 fs.mkdirSync(folderPath);
 fs.mkdirSync(`${folderPath}/structures`);
 fs.mkdirSync(`${folderPath}/modules`);
-fs.writeFileSync(`${folderPath}/core.js` , `module.exports = {
-    callback: (folders, structureName) => {
-        
+fs.writeFileSync(`${folderPath}/core.js` , `const { printC, printCLn } = require("../../utilities/printer");
+const config = require("./config.js");
+
+module.exports = {
+    callback: (structures) => {
+        printCLn(config.name + " : ", "blue")
+        Object.keys(structures).forEach(structureName => {
+            printCLn("\t->" + structureName + " : " + structures[structureName].length, "blue")
+        });
     }
 }`);
 fs.writeFileSync(`${folderPath}/config.js` , `module.exports = {

@@ -1,10 +1,11 @@
-const { printC } = require('../../utilities/printer');
+const { printC, printCLn } = require("../../utilities/printer");
+const config = require("./config.js");
 
 module.exports = {
-    callback: (folders, structureName) => {
-        console.log(`${structureName} : ${folders.length}`);
-        folders.forEach(folder => {
-            console.log(`${folder}`);
+    callback: (structures) => {
+        printCLn(config.name + " : ", "blue")
+        Object.keys(structures).forEach(structureName => {
+            printCLn("\t->" + structureName + " : " + structures[structureName].length, "blue")
         });
     }
 }

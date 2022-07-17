@@ -53,7 +53,7 @@ function compareArborescence(requiredPaths, folderPath, alreadyChecked, folderNa
                     alreadyChecked.push(matches[j]);
                 }
             }
-            // If we have yet analysed that folder, we skip it
+            // If we have yet analyzed that folder, we skip it
             if (everythingAlreadyChecked === true) {
                 return {valid: false};
             }
@@ -78,7 +78,7 @@ module.exports = {
         return splitted[splitted.length - 3];
     },
 
-    structureComparator(folder, structurePath, alreadyChecked = []) {
+    structureComparator(folder, moduleData, alreadyChecked = []) {
         // We have a folder directory, and a structure file that represents the folder structure.
         // We need to check if the folder directory and the structure file are the same.
         // So we have to check names, and if they are the same, we need to check if the folders are the same.
@@ -87,26 +87,48 @@ module.exports = {
         // Example:
         // name: "*.c" -> Every file with the extension c
 
-        structureParser(structurePath);
-
-        const requiredStructure = fs.readFileSync(structurePath.replace(new RegExp(".st$"), '-required.txt'), 'utf8');
-        const requiredPaths = requiredStructure.split("\n"); // Split the structure into lines.
-        const deep = howDeepIsFirstExtensionFile(requiredPaths);
-
-
-        var structureExtensions = [];    
-        requiredPaths.forEach(path => {
-            // Get everything after the last "."
-            var extension = path.split(".").pop();
-            if (!structureExtensions.includes(extension)) {
-                structureExtensions.push(extension);
-            }
-        });
-
-
+        var globalData = [];
+        var structureExtensions = [];
 
         // We store the files that are valid in this array
         var matchingPath = [];
+
+        moduleData.forEach(module => {
+            var structurePaths = module.structures;
+            var moduleName = module.name;
+            var requiredPaths = [];
+            var moduleExtensions = [];
+            matchingPath[moduleName] = [];
+            structurePaths.forEach(structurePath => {
+                structureParser(structurePath);
+                var paths = fs.readFileSync(structurePath.replace(new RegExp(".st$"), '-required.txt'), 'utf8');
+                var pathList = paths.split("\n");
+                var structureName = structurePath.split("/").pop().replace(new RegExp(".st$"), '');
+                requiredPaths.push({
+                    pathList: pathList,
+                    deep: howDeepIsFirstExtensionFile(pathList),
+                    structureName: structureName
+                });
+
+                matchingPath[moduleName][structureName] = [];
+ 
+                pathList.forEach(path => {
+                    // Get everything after the last "."
+                    var extension = path.split(".").pop();
+                    if (!structureExtensions.includes(extension)) {
+                        structureExtensions.push(extension);
+                        moduleExtensions.push(extension);
+                    }
+                });
+            });
+
+
+            globalData.push({
+                name: moduleName,
+                requiredPaths: requiredPaths,
+                moduleExtensions: moduleExtensions
+            });
+        });
 
         const readFolder = (dir) => {
             var files = fs.readdirSync(dir);
@@ -124,15 +146,26 @@ module.exports = {
 
                         // If one of the file extensions of files is in extensions array
                         if (files.some(file => structureExtensions.includes(file.split(".").pop()))) {
-                            var pathToAnalyse = getNthParent(filePath, deep);
 
-                            // We check if the folder is following the structure
-                            var data = compareArborescence(requiredPaths, pathToAnalyse, alreadyChecked, filePath);
+                            globalData.forEach(module => {
 
-                            if (data.valid === true) {
-                                alreadyChecked = data.alreadyChecked;
-                                matchingPath.push(filePath);
-                            }
+                                var moduleExtensions = module.moduleExtensions;
+                                // If the file extension is in the module extensions
+                                if (files.some(file => moduleExtensions.includes(file.split(".").pop()))) {
+                                    
+                                    for (var i=0;i<module.requiredPaths.length;i++) {
+
+                                        // Path to analyze
+                                        var pathToAnalyze = getNthParent(filePath, module.requiredPaths[i].deep);
+                                        var result = compareArborescence(module.requiredPaths[i].pathList, pathToAnalyze, alreadyChecked, filePath);
+                                        if (result.valid === true) {
+                                            alreadyChecked = result.alreadyChecked;
+                                            matchingPath[module.name][module.requiredPaths[i].structureName].push(filePath);
+                                        }
+                                    }
+                                
+                                }
+                            });
                         }
 
                         // Recursion
