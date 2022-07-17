@@ -14,9 +14,20 @@ cd smart-sorter
 
 ## Usage
 
+
+### Software Configuration
+
+Add `workPath` in config.json file.
+
+Then to run it just use the following command :
+
+```bash
+node index.js
+```
+
 ### Type Configuration
 
-After installing the program, you have to configure it :
+You can configure it :
 
 ```bash
 npm run add-type
@@ -44,17 +55,6 @@ Example :
 ```
 
 In plain text, it gives : "a folder with whatever name, inside : main.c, a folder and .c/.h that aren't required. Inside the second folder, whatever file extension".
-
-### Software Configuration
-
-Add `workPath` in config.json file.
-
-Then to run it just use the following command :
-
-```bash
-node index.js
-```
-
 
 ## Contributing
 
