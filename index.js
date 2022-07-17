@@ -1,8 +1,12 @@
+
+console.time("execution");  
+
 const eventEmitter = require('events');
 const emitter = new eventEmitter();
 const path = require('path');
 const { printC, printCLn } = require('./utilities/printer');
 const fs = require('fs');
+
 
 const { structureComparator } = require('./utilities/folderUtil');
 
@@ -52,4 +56,5 @@ process.on("exit", () => {
     printCLn("\nDone.\n");
     log("Done.");
     log("----------", true);
+    console.timeEnd("execution");
 });
