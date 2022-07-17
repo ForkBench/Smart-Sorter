@@ -33,9 +33,9 @@ module.exports = {
     }
 }`);
 fs.writeFileSync(`${folderPath}/config.js` , `module.exports = {
-    name: "C-program",
-    description: "C-program, with globally .c files.",
-    mainExtensions: ["c", "h", "cpp", "hpp"],
+    name: "",
+    description: "",
+    mainExtensions: [],
 }`);
 
 console.log(`Type ${name} created.`);

@@ -78,7 +78,7 @@ module.exports = {
         return splitted[splitted.length - 3];
     },
 
-    structureComparator(folder, moduleData, alreadyChecked = []) {
+    structureComparator(folder, moduleData) {
         // We have a folder directory, and a structure file that represents the folder structure.
         // We need to check if the folder directory and the structure file are the same.
         // So we have to check names, and if they are the same, we need to check if the folders are the same.
@@ -89,6 +89,7 @@ module.exports = {
 
         var globalData = [];
         var structureExtensions = [];
+        var alreadyChecked = [];
 
         // We store the files that are valid in this array
         var matchingPath = [];
@@ -99,11 +100,13 @@ module.exports = {
             var requiredPaths = [];
             var moduleExtensions = [];
             matchingPath[moduleName] = [];
+            alreadyChecked[moduleName] = [];
             structurePaths.forEach(structurePath => {
                 structureParser(structurePath);
                 var paths = fs.readFileSync(structurePath.replace(new RegExp(".st$"), '-required.txt'), 'utf8');
                 var pathList = paths.split("\n");
                 var structureName = structurePath.split("/").pop().replace(new RegExp(".st$"), '');
+
                 requiredPaths.push({
                     pathList: pathList,
                     deep: howDeepIsFirstExtensionFile(pathList),
@@ -126,7 +129,8 @@ module.exports = {
             globalData.push({
                 name: moduleName,
                 requiredPaths: requiredPaths,
-                moduleExtensions: moduleExtensions
+                moduleExtensions: moduleExtensions,
+                priority: module.priority
             });
         });
 
@@ -152,16 +156,31 @@ module.exports = {
                                 var moduleExtensions = module.moduleExtensions;
                                 // If the file extension is in the module extensions
                                 if (files.some(file => moduleExtensions.includes(file.split(".").pop()))) {
+
+                                    const analysePath = (i) => {
+                                        // Path to analyze
+                                        var pathToAnalyze = getNthParent(filePath, module.requiredPaths[i].deep);
+                                        var result = compareArborescence(module.requiredPaths[i].pathList, pathToAnalyze, alreadyChecked[module.name], filePath);
+                                        if (result.valid === true) {
+                                            alreadyChecked[module.name] = result.alreadyChecked;
+                                            matchingPath[module.name][module.requiredPaths[i].structureName].push(filePath);
+                                        }
+                                    }
+
+                                    module.priority.forEach(priority => {
+                                        // We have to get the index of the priority in the requiredPaths array
+                                        var index = module.requiredPaths.findIndex(requiredPath => requiredPath.structureName === priority);
+
+                                        analysePath(index);
+                                    });
                                     
                                     for (var i=0;i<module.requiredPaths.length;i++) {
 
-                                        // Path to analyze
-                                        var pathToAnalyze = getNthParent(filePath, module.requiredPaths[i].deep);
-                                        var result = compareArborescence(module.requiredPaths[i].pathList, pathToAnalyze, alreadyChecked, filePath);
-                                        if (result.valid === true) {
-                                            alreadyChecked = result.alreadyChecked;
-                                            matchingPath[module.name][module.requiredPaths[i].structureName].push(filePath);
+                                        // Don't do the priority one
+                                        if (module.priority.indexOf(module.requiredPaths[i].structureName) === -1) {
+                                            analysePath(i);
                                         }
+                                        
                                     }
                                 
                                 }

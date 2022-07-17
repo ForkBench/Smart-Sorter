@@ -31,11 +31,13 @@ fs.readdirSync("./types").forEach(folder => {
     log(`Found ${structures.length} structures`);
 
     var typeName = moduleConfig.name;
-    var typeData = {name: typeName, structures: []};
+    var typeData = {name: typeName, structures: [], priority: []};
 
     structures.forEach(structure => {
         typeData.structures.push(`./types/${folder}/structures/${structure}/${structure}.st`);
     });
+
+    typeData.priority = moduleConfig.priority;
 
     moduleData.push(typeData);
     emitter.on(`${typeName}`, (structures) => {
@@ -46,6 +48,8 @@ fs.readdirSync("./types").forEach(folder => {
 
 var matchingData = structureComparator(workPath, moduleData);
 
+// Write data on json file with indent
+fs.writeFileSync(`${workPath}/data.json`, JSON.stringify(matchingData, null, 4));
 
 Object.keys(matchingData).forEach(moduleName => {
     emitter.emit(moduleName, matchingData[moduleName]);
