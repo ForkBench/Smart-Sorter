@@ -4,7 +4,6 @@ console.time("execution");
 const eventEmitter = require('events');
 const emitter = new eventEmitter();
 
-const path = require('path');
 const { printC, printCLn } = require('./utilities/printer');
 const fs = require('fs');
 
