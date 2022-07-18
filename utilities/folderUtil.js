@@ -92,14 +92,14 @@ module.exports = {
         var alreadyChecked = [];
 
         // We store the files that are valid in this array
-        var matchingPath = [];
+        var matchingPath = {};
 
         moduleData.forEach(module => {
             var structurePaths = module.structures;
             var moduleName = module.name;
             var requiredPaths = [];
             var moduleExtensions = [];
-            matchingPath[moduleName] = [];
+            matchingPath[moduleName] = {};
             alreadyChecked[moduleName] = [];
             structurePaths.forEach(structurePath => {
                 structureParser(structurePath);
@@ -163,7 +163,7 @@ module.exports = {
                                         var result = compareArborescence(module.requiredPaths[i].pathList, pathToAnalyze, alreadyChecked[module.name], filePath);
                                         if (result.valid === true) {
                                             alreadyChecked[module.name] = result.alreadyChecked;
-                                            matchingPath[module.name][module.requiredPaths[i].structureName].push(filePath);
+                                            matchingPath[module.name][module.requiredPaths[i].structureName].push(filePath.replace("//", "/"));
                                         }
                                     }
 
