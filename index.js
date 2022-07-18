@@ -1,5 +1,15 @@
 
 console.time("execution");  
+var config;
+try {
+    config = require('./config');
+} catch (err) {
+    throw new Error(`No config file found.`);
+}
+
+if (config.workPath === undefined) {
+    throw new Error("No workPath defined in config.js");
+}
 
 const eventEmitter = require('events');
 const emitter = new eventEmitter();
@@ -10,7 +20,6 @@ const fs = require('fs');
 
 const { structureComparator } = require('./utilities/folderUtil');
 
-const config = require('./config');
 const workPath = config.workPath;
 const { log } = require('./utilities/logger');
 
@@ -18,13 +27,21 @@ var moduleData = [];
 
 // Import modules
 fs.readdirSync("./types").forEach(folder => {
-    const module = require(`./types/${folder}/core.js`);
-    const moduleConfig = require(`./types/${folder}/config.js`);
+    
+    var module, moduleConfig, structures;
 
-    printCLn(`Importing ${folder}`);
-    log(`Loaded module ${folder}`);
+    try {
+        module = require(`./types/${folder}/core.js`);
+        moduleConfig = require(`./types/${folder}/config.js`);
+        printCLn(`Importing ${folder}`);
+        log(`Loaded module ${folder}`);
 
-    const structures = fs.readdirSync(`./types/${folder}/structures`);
+        structures = fs.readdirSync(`./types/${folder}/structures`);
+    } catch (err) {
+        throw new Error(`types/${folder} is not a valid module.`);
+    }
+
+    
 
     printCLn(`Found ${structures.length} structures`);
     log(`Found ${structures.length} structures`);
@@ -45,11 +62,14 @@ fs.readdirSync("./types").forEach(folder => {
 
 });
 
+log(`Reading ${workPath} folder`);
 var matchingData = structureComparator(workPath, moduleData);
 
 // Write data on json file with indent
+log(`Writing data on json file with indent : ${workPath}/data.json`);
 fs.writeFileSync(`${workPath}/data.json`, JSON.stringify(matchingData, null, 4));
 
+log(`Emitting data to callbacks`)
 Object.keys(matchingData).forEach(moduleName => {
     emitter.emit(moduleName, matchingData[moduleName]);
 });

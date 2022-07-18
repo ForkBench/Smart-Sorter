@@ -102,8 +102,13 @@ module.exports = {
             matchingPath[moduleName] = {};
             alreadyChecked[moduleName] = [];
             structurePaths.forEach(structurePath => {
-                structureParser(structurePath);
-                var paths = fs.readFileSync(structurePath.replace(new RegExp(".st$"), '-required.txt'), 'utf8');
+                try {
+                    structureParser(structurePath);
+                    var paths = fs.readFileSync(structurePath.replace(new RegExp(".st$"), '-required.txt'), 'utf8');
+                } catch (err) {
+                    throw new Error(`No such structure file: ${structurePath}`);
+                }
+                
                 var pathList = paths.split("\n");
                 var structureName = structurePath.split("/").pop().replace(new RegExp(".st$"), '');
 
