@@ -18,13 +18,18 @@ function parser(lines) {
     var currentPath = ".";
 
     lines.forEach(line => {
+        // Clear line
         var clearedLine = emptySpaceRemover(line);
+
+        // Beginning of a new folder
         if (clearedLine.startsWith("[")) {
             var name = clearedLine.substring(1, clearedLine.length - 2);
             currentPath += "/" + name;
+        // End of a folder
         } else if (clearedLine.startsWith("}")) {
             currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"));
         } else {
+        // A file
             var name = clearedLine;
             paths.push(currentPath + "/" + name);
         }

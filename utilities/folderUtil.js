@@ -94,6 +94,10 @@ module.exports = {
         // We store the files that are valid in this array
         var matchingPath = {};
 
+        /*
+        For each module, we keep structures and extensions
+        And we create matchingPaths for each module, to store response data
+        */
         moduleData.forEach(module => {
             var structurePaths = module.structures;
             var moduleName = module.name;
@@ -102,6 +106,7 @@ module.exports = {
             matchingPath[moduleName] = {};
             alreadyChecked[moduleName] = [];
             structurePaths.forEach(structurePath => {
+                // Getting structure data
                 try {
                     structureParser(structurePath);
                     var paths = fs.readFileSync(structurePath.replace(new RegExp(".st$"), '-required.txt'), 'utf8');
@@ -112,6 +117,7 @@ module.exports = {
                 var pathList = paths.split("\n");
                 var structureName = structurePath.split("/").pop().replace(new RegExp(".st$"), '');
 
+                // Add the requirePath from structure
                 requiredPaths.push({
                     pathList: pathList,
                     deep: howDeepIsFirstExtensionFile(pathList),
@@ -119,7 +125,8 @@ module.exports = {
                 });
 
                 matchingPath[moduleName][structureName] = [];
- 
+                
+                // We add the extensions to help speed up the comparison
                 pathList.forEach(path => {
                     // Get everything after the last "."
                     var extension = path.split(".").pop();
@@ -130,7 +137,7 @@ module.exports = {
                 });
             });
 
-
+            // We store everything
             globalData.push({
                 name: moduleName,
                 requiredPaths: requiredPaths,
@@ -139,7 +146,9 @@ module.exports = {
             });
         });
 
+        // Main function
         const readFolder = (dir) => {
+            // list files / folders
             var files = fs.readdirSync(dir);
             files.forEach(file => {
                 var fileName = file.split("/").pop();
@@ -162,22 +171,40 @@ module.exports = {
                                 // If the file extension is in the module extensions
                                 if (files.some(file => moduleExtensions.includes(file.split(".").pop()))) {
 
+                                    // To avoid copy pasting code, we create a temporary function
+                                    // -> [NOTE]  : could have done before, to avoid doing it each time
                                     const analysePath = (i) => {
                                         // Path to analyze
+                                        /*
+                                        We have a path with a file, we want to check if it is in the structure
+                                            -> But the structure could be bigger than only a file, so we have to go back to the parent folder
+                                            Example : 
+                                            Structure : "./ * / file.c"
+                                            File : "./A/B/C/file.c"
+
+                                        -> We need to check if "./A/B/C" is in the structure
+                                            Structure depth is 1, so we need to go back to the parent folder
+                                                -> getNthParent("./A/B/C/file.c", 1)
+                                        */
                                         var pathToAnalyze = getNthParent(filePath, module.requiredPaths[i].deep);
                                         var result = compareArborescence(module.requiredPaths[i].pathList, pathToAnalyze, alreadyChecked[module.name], filePath);
+                                        
+                                        // Check results
                                         if (result.valid === true) {
                                             alreadyChecked[module.name] = result.alreadyChecked;
                                             matchingPath[module.name][module.requiredPaths[i].structureName].push(filePath.replace("//", "/"));
                                         }
+
                                     }
 
+                                    // Priority first
                                     module.priority.forEach(priority => {
                                         // We have to get the index of the priority in the requiredPaths array
                                         var index = module.requiredPaths.findIndex(requiredPath => requiredPath.structureName === priority);
 
                                         analysePath(index);
                                     });
+                                    
                                     
                                     for (var i=0;i<module.requiredPaths.length;i++) {
 

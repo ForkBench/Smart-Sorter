@@ -14,7 +14,7 @@ if (config.workPath === undefined) {
 const eventEmitter = require('events');
 const emitter = new eventEmitter();
 
-const { printC, printCLn } = require('./utilities/printer');
+const { printCLn } = require('./utilities/printer');
 const fs = require('fs');
 
 
@@ -30,7 +30,9 @@ fs.readdirSync(__dirname + "/types").forEach(folder => {
     
     var module, moduleConfig, structures;
 
+    // Reading module data (name, structures, etc.)
     try {
+
         module = require(__dirname + `/types/${folder}/core.js`);
         moduleConfig = require(__dirname + `/types/${folder}/config.js`);
         printCLn(`Importing ${folder}`);
@@ -46,6 +48,8 @@ fs.readdirSync(__dirname + "/types").forEach(folder => {
     printCLn(`Found ${structures.length} structures`);
     log(`Found ${structures.length} structures`);
 
+    // Listing all the structures in the module
+    // Typedata permits to keep where does the structure come from
     var typeName = moduleConfig.name;
     var typeData = {name: typeName, structures: [], priority: []};
 
@@ -56,12 +60,15 @@ fs.readdirSync(__dirname + "/types").forEach(folder => {
     typeData.priority = moduleConfig.priority;
 
     moduleData.push(typeData);
+
+    // Listening to responses (we could have done it synchronously, but this is more readable)
     emitter.on(`${typeName}`, (structures) => {
         module.callback(structures);
     });
 
 });
 
+// Main function
 log(`Reading ${workPath} folder`);
 var matchingData = structureComparator(workPath, moduleData);
 
@@ -69,11 +76,14 @@ var matchingData = structureComparator(workPath, moduleData);
 log(`Writing data on json file with indent : ${workPath}/data.json`);
 fs.writeFileSync(`${workPath}/data.json`, JSON.stringify(matchingData, null, 4));
 
+// After recieving all the data, we can start to process it
 log(`Emitting data to callbacks`)
 Object.keys(matchingData).forEach(moduleName => {
     emitter.emit(moduleName, matchingData[moduleName]);
 });
 
+
+// To help logging
 process.on("exit", () => {
     printCLn("\nDone.\n");
     log("Done.");
