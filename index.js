@@ -26,17 +26,17 @@ const { log } = require('./utilities/logger');
 var moduleData = [];
 
 // Import modules
-fs.readdirSync("./types").forEach(folder => {
+fs.readdirSync(__dirname + "/types").forEach(folder => {
     
     var module, moduleConfig, structures;
 
     try {
-        module = require(`./types/${folder}/core.js`);
-        moduleConfig = require(`./types/${folder}/config.js`);
+        module = require(__dirname + `/types/${folder}/core.js`);
+        moduleConfig = require(__dirname + `/types/${folder}/config.js`);
         printCLn(`Importing ${folder}`);
         log(`Loaded module ${folder}`);
 
-        structures = fs.readdirSync(`./types/${folder}/structures`);
+        structures = fs.readdirSync(__dirname + `/types/${folder}/structures`);
     } catch (err) {
         throw new Error(`types/${folder} is not a valid module.`);
     }
@@ -50,7 +50,7 @@ fs.readdirSync("./types").forEach(folder => {
     var typeData = {name: typeName, structures: [], priority: []};
 
     structures.forEach(structure => {
-        typeData.structures.push(`./types/${folder}/structures/${structure}/${structure}.st`);
+        typeData.structures.push(__dirname + `/types/${folder}/structures/${structure}/${structure}.st`);
     });
 
     typeData.priority = moduleConfig.priority;

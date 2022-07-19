@@ -6,7 +6,7 @@ module.exports = {
         // logs files are stored in the logs folder
         // take the last log file and add the new message to it
         // if the log file is too big, create a new one
-        var logFiles = fs.readdirSync("./logs/" + logFolderPath);
+        var logFiles = fs.readdirSync(__dirname + "/../logs/" + logFolderPath);
 
         var date = new Date();
         // For message
@@ -15,8 +15,8 @@ module.exports = {
         var dateStringFile = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
 
         if (logFiles.length === 0) {
-            fs.writeFileSync("./logs/" + logFolderPath + "log_" + dateStringFile + ".log", "");
-            logFiles = fs.readdirSync("./logs/" + logFolderPath);
+            fs.writeFileSync(__dirname + "/../logs/" + logFolderPath + "log_" + dateStringFile + ".log", "");
+            logFiles = fs.readdirSync(__dirname + "/../logs/" + logFolderPath);
         }
 
 
