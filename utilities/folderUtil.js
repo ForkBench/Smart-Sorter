@@ -1,12 +1,14 @@
-const glob = require('glob');
-const { structureParser } = require('./structure-parser');
-const fs = require('fs');
+const glob = require("glob");
+const { structureParser } = require("./structure-parser");
+const fs = require("fs");
 
 function fileExists(filePath, folderName) {
     try {
         // We keep only the files that match the pattern
         // AND only between them that have the same name as the folder
-        return glob.sync(filePath).filter(file => file.indexOf(folderName) !== -1);
+        return glob
+            .sync(filePath)
+            .filter((file) => file.indexOf(folderName) !== -1);
     } catch (err) {
         return undefined;
     }
@@ -16,7 +18,7 @@ function howDeepIsFirstExtensionFile(requiredPaths) {
     // We have a list of paths, we need to find the less deep one
     var minDepth = Infinity;
     var minDepth = requiredPaths.reduce((min, path) => {
-        var depth = path.split('/').length;
+        var depth = path.split("/").length;
         return depth < min ? depth : min;
     }, Infinity);
 
@@ -24,15 +26,19 @@ function howDeepIsFirstExtensionFile(requiredPaths) {
 }
 
 function getNthParent(path, n) {
-    var pathArray = path.split('/');
+    var pathArray = path.split("/");
     if (n >= pathArray.length) {
-        return '';
+        return "";
     }
-    return pathArray.slice(0, pathArray.length - n).join('/');
+    return pathArray.slice(0, pathArray.length - n).join("/");
 }
 
-
-function compareArborescence(requiredPaths, folderPath, alreadyChecked, folderName) {
+function compareArborescence(
+    requiredPaths,
+    folderPath,
+    alreadyChecked,
+    folderName
+) {
     // Sometimes, another slash appears, remove it
     folderName = folderName.replace("//", "/");
 
@@ -42,7 +48,7 @@ function compareArborescence(requiredPaths, folderPath, alreadyChecked, folderNa
         // We check if the file exists in the folder
         var matches = fileExists(folderPath + "/" + path, folderName);
         if (matches === undefined || matches.length === 0) {
-            return {valid: false};
+            return { valid: false };
         }
         // Check if every matches are already checked
         if (alreadyChecked.length > 0) {
@@ -55,26 +61,24 @@ function compareArborescence(requiredPaths, folderPath, alreadyChecked, folderNa
             }
             // If we have yet analyzed that folder, we skip it
             if (everythingAlreadyChecked === true) {
-                return {valid: false};
+                return { valid: false };
             }
         } else {
             // If it's the first time checking this file, we add it
             alreadyChecked = matches;
         }
-
     }
 
-    return {valid: true, alreadyChecked: alreadyChecked};
+    return { valid: true, alreadyChecked: alreadyChecked };
 }
-
 
 module.exports = {
     getDirectParent: (folder) => {
         var splitted = folder.split("/");
         if (splitted.length < 3) {
-            return undefined
+            return undefined;
         }
-        
+
         return splitted[splitted.length - 3];
     },
 
@@ -98,36 +102,45 @@ module.exports = {
         For each module, we keep structures and extensions
         And we create matchingPaths for each module, to store response data
         */
-        moduleData.forEach(module => {
+        moduleData.forEach((module) => {
             var structurePaths = module.structures;
             var moduleName = module.name;
             var requiredPaths = [];
             var moduleExtensions = [];
             matchingPath[moduleName] = {};
             alreadyChecked[moduleName] = [];
-            structurePaths.forEach(structurePath => {
+            structurePaths.forEach((structurePath) => {
                 // Getting structure data
                 try {
                     structureParser(structurePath);
-                    var paths = fs.readFileSync(structurePath.replace(new RegExp(".st$"), '-required.txt'), 'utf8');
+                    var paths = fs.readFileSync(
+                        structurePath.replace(
+                            new RegExp(".st$"),
+                            "-required.txt"
+                        ),
+                        "utf8"
+                    );
                 } catch (err) {
                     throw new Error(`No such structure file: ${structurePath}`);
                 }
-                
+
                 var pathList = paths.split("\n");
-                var structureName = structurePath.split("/").pop().replace(new RegExp(".st$"), '');
+                var structureName = structurePath
+                    .split("/")
+                    .pop()
+                    .replace(new RegExp(".st$"), "");
 
                 // Add the requirePath from structure
                 requiredPaths.push({
                     pathList: pathList,
                     deep: howDeepIsFirstExtensionFile(pathList),
-                    structureName: structureName
+                    structureName: structureName,
                 });
 
                 matchingPath[moduleName][structureName] = [];
-                
+
                 // We add the extensions to help speed up the comparison
-                pathList.forEach(path => {
+                pathList.forEach((path) => {
                     // Get everything after the last "."
                     var extension = path.split(".").pop();
                     if (!structureExtensions.includes(extension)) {
@@ -142,7 +155,7 @@ module.exports = {
                 name: moduleName,
                 requiredPaths: requiredPaths,
                 moduleExtensions: moduleExtensions,
-                priority: module.priority
+                priority: module.priority,
             });
         });
 
@@ -150,32 +163,44 @@ module.exports = {
         const readFolder = (dir) => {
             // list files / folders
             var files = fs.readdirSync(dir);
-            files.forEach(file => {
+            files.forEach((file) => {
                 var fileName = file.split("/").pop();
 
                 // Ignore hidden files
                 if (!fileName.startsWith(".")) {
                     // Make the new path
                     var filePath = dir + "/" + file;
-                    if (fs.statSync(filePath).isDirectory()) {
 
-                        // We get the files
-                        var files = fs.readdirSync(filePath);
+                    try {
+                        // Check if it's a file
+                        if (!fs.statSync(filePath).isFile()) {
+                            // We get the files
+                            var files = fs.readdirSync(filePath);
 
-                        // If one of the file extensions of files is in extensions array
-                        if (files.some(file => structureExtensions.includes(file.split(".").pop()))) {
-
-                            globalData.forEach(module => {
-
-                                var moduleExtensions = module.moduleExtensions;
-                                // If the file extension is in the module extensions
-                                if (files.some(file => moduleExtensions.includes(file.split(".").pop()))) {
-
-                                    // To avoid copy pasting code, we create a temporary function
-                                    // -> [NOTE]  : could have done before, to avoid doing it each time
-                                    const analysePath = (i) => {
-                                        // Path to analyze
-                                        /*
+                            // If one of the file extensions of files is in extensions array
+                            if (
+                                files.some((file) =>
+                                    structureExtensions.includes(
+                                        file.split(".").pop()
+                                    )
+                                )
+                            ) {
+                                globalData.forEach((module) => {
+                                    var moduleExtensions =
+                                        module.moduleExtensions;
+                                    // If the file extension is in the module extensions
+                                    if (
+                                        files.some((file) =>
+                                            moduleExtensions.includes(
+                                                file.split(".").pop()
+                                            )
+                                        )
+                                    ) {
+                                        // To avoid copy pasting code, we create a temporary function
+                                        // -> [NOTE]  : could have done before, to avoid doing it each time
+                                        const analysePath = (i) => {
+                                            // Path to analyze
+                                            /*
                                         We have a path with a file, we want to check if it is in the structure
                                             -> But the structure could be bigger than only a file, so we have to go back to the parent folder
                                             Example : 
@@ -186,52 +211,75 @@ module.exports = {
                                             Structure depth is 1, so we need to go back to the parent folder
                                                 -> getNthParent("./A/B/C/file.c", 1)
                                         */
-                                        var pathToAnalyze = getNthParent(filePath, module.requiredPaths[i].deep);
-                                        var result = compareArborescence(module.requiredPaths[i].pathList, pathToAnalyze, alreadyChecked[module.name], filePath);
-                                        
-                                        // Check results
-                                        if (result.valid === true) {
-                                            alreadyChecked[module.name] = result.alreadyChecked;
-                                            matchingPath[module.name][module.requiredPaths[i].structureName].push(filePath.replace("//", "/"));
+                                            var pathToAnalyze = getNthParent(
+                                                filePath,
+                                                module.requiredPaths[i].deep
+                                            );
+                                            var result = compareArborescence(
+                                                module.requiredPaths[i]
+                                                    .pathList,
+                                                pathToAnalyze,
+                                                alreadyChecked[module.name],
+                                                filePath
+                                            );
+
+                                            // Check results
+                                            if (result.valid === true) {
+                                                alreadyChecked[module.name] =
+                                                    result.alreadyChecked;
+                                                matchingPath[module.name][
+                                                    module.requiredPaths[i]
+                                                        .structureName
+                                                ].push(
+                                                    filePath.replace("//", "/")
+                                                );
+                                            }
+                                        };
+
+                                        // Priority first
+                                        module.priority.forEach((priority) => {
+                                            // We have to get the index of the priority in the requiredPaths array
+                                            var index =
+                                                module.requiredPaths.findIndex(
+                                                    (requiredPath) =>
+                                                        requiredPath.structureName ===
+                                                        priority
+                                                );
+
+                                            analysePath(index);
+                                        });
+
+                                        for (
+                                            var i = 0;
+                                            i < module.requiredPaths.length;
+                                            i++
+                                        ) {
+                                            // Don't do the priority one
+                                            if (
+                                                module.priority.indexOf(
+                                                    module.requiredPaths[i]
+                                                        .structureName
+                                                ) === -1
+                                            ) {
+                                                analysePath(i);
+                                            }
                                         }
-
                                     }
+                                });
+                            }
 
-                                    // Priority first
-                                    module.priority.forEach(priority => {
-                                        // We have to get the index of the priority in the requiredPaths array
-                                        var index = module.requiredPaths.findIndex(requiredPath => requiredPath.structureName === priority);
-
-                                        analysePath(index);
-                                    });
-                                    
-                                    
-                                    for (var i=0;i<module.requiredPaths.length;i++) {
-
-                                        // Don't do the priority one
-                                        if (module.priority.indexOf(module.requiredPaths[i].structureName) === -1) {
-                                            analysePath(i);
-                                        }
-                                        
-                                    }
-                                
-                                }
-                            });
+                            // Recursion
+                            readFolder(filePath);
                         }
-
-                        // Recursion
-                        readFolder(filePath);
+                    } catch (err) {
+                        // Ignore
                     }
                 }
-
-                
             });
-        }
+        };
 
         readFolder(folder);
 
         return matchingPath;
-    }
-
-
-}
+    },
+};

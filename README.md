@@ -10,6 +10,7 @@ Use the `git clone` command to download the repository.
 ```bash
 git clone https://gitlab.isima.fr/rovandemer/smart-sorter.git
 cd smart-sorter
+npm install
 ```
 
 ## Usage
@@ -18,6 +19,19 @@ cd smart-sorter
 ### Software Configuration
 
 Add `workPath` in config.json file.
+
+```json
+{
+    "workPath": "..."
+}
+```
+
+Create a `log/prog-logs/` folder and its file :
+
+```bash
+mkdir -p log/prog-logs
+touch log/prog-logs/prog-logs.log
+```
 
 Then to run it just use the following command :
 
@@ -38,7 +52,7 @@ Then type the name, and configure the structures as following :
 ```
 [CONTENT]   => Directory named "CONTENT"
 *           => glob substitution for "all"
-?           => make some content not required (not implemented yet)
+?           => make some content not required
 ```
 
 Example :
@@ -89,8 +103,8 @@ It's based on names analysis, and it's not very accurate sometimes (for example 
 ## Future plans
 
 - Add *mutli-folder* projects support
-  - For example if a project has sub folders like `src/`, `include/`, `lib/` etc.
-  - Analyse *parents*, they have to be filled with the same type
+  - ~~For example if a project has sub folders like `src/`, `include/`, `lib/` etc.~~
+  - ~~Analyse *parents*, they have to be filled with the same type~~
   - Analyse the *file content*
     - For example imports, includes, defines, etc...
     - Using [`flex-js-open`](https://www.npmjs.com/package/@fork-bench/flexjs-open)?
